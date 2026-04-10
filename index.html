@@ -1,70 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Music Site</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #111;
-      color: white;
-      text-align: center;
-      margin: 0;
-    }
+<meta charset="UTF-8">
+<title>Armenian Music Hub</title>
 
-    header {
-      padding: 20px;
-      background: #222;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #2b0000, #000);
+  color: white;
+}
 
-    .song {
-      margin: 20px;
-      padding: 15px;
-      background: #1e1e1e;
-      border-radius: 10px;
-    }
+/* HEADER */
+header {
+  background: #8B0000;
+  padding: 15px;
+  text-align: center;
+  font-size: 24px;
+}
 
-    button {
-      padding: 10px 20px;
-      border: none;
-      background: #ff4d6d;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+/* SEARCH */
+#search {
+  width: 90%;
+  padding: 10px;
+  margin: 15px;
+  border-radius: 8px;
+  border: none;
+}
 
-    button:hover {
-      background: #ff1e4d;
-    }
-  </style>
+/* GRID */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.song {
+  background: #1a1a1a;
+  margin: 10px;
+  padding: 15px;
+  border-radius: 12px;
+  width: 200px;
+  text-align: center;
+}
+
+.song img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* PLAYER BAR */
+.player {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* BUTTONS */
+button {
+  background: #d32f2f;
+  border: none;
+  padding: 8px 12px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #ff5252;
+}
+
+.liked {
+  color: gold;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-  <h1>🎵 My Music Site</h1>
-  <p>Welcome to my music collection</p>
-</header>
+<header>🇦🇲 Armenian Music Hub</header>
 
-<div class="song">
-  <h3>Song 1</h3>
-  <audio controls>
-    <source src="song1.mp3" type="audio/mpeg">
-  </audio>
+<center>
+<input type="text" id="search" placeholder="Search music..." onkeyup="searchSongs()">
+</center>
+
+<div class="container" id="songs"></div>
+
+<div class="player">
+  <div id="nowPlaying">No song playing</div>
+  <audio id="audio" controls></audio>
 </div>
 
-<div class="song">
-  <h3>Song 2</h3>
-  <audio controls>
-    <source src="song2.mp3" type="audio/mpeg">
-  </audio>
-</div>
+<script>
+const songs = [
+  {
+    title: "Armenian Vibes",
+    file: "song1.mp3",
+    cover: "https://via.placeholder.com/200"
+  },
+  {
+    title: "Yerevan Nights",
+    file: "song2.mp3",
+    cover: "https://via.placeholder.com/200"
+  },
+  {
+    title: "Duduk Soul",
+    file: "song3.mp3",
+    cover: "https://via.placeholder.com/200"
+  }
+];
 
-<div class="song">
-  <h3>Song 3</h3>
-  <audio controls>
-    <source src="song3.mp3" type="audio/mpeg">
-  </audio>
-</div>
+let likedSongs = JSON.parse(localStorage.getItem("likes")) || [];
+
+const container = document.getElementById("songs");
+const audio = document.getElementById("audio");
+const nowPlaying = document.getElementById("nowPlaying");
+
+function displaySongs(list) {
+  container.innerHTML = "";
+  list.forEach((song, index) => {
+    const liked = likedSongs.includes(song.title) ? "liked" : "";
+
+    container.innerHTML += `
+      <div class="song">
+        <img src="${song.cover}">
+        <h3>${song.title}</h3>
+        <button onclick="play(${index})">▶ Play</button>
+        <button class="${liked}" onclick="like('${song.title}', this)">❤️</button>
+      </div>
+    `;
+  });
+}
+
+function play(i) {
+  audio.src = songs[i].file;
+  audio.play();
+  nowPlaying.innerText = "Now Playing: " + songs[i].title;
+}
+
+function like(title, btn) {
+  if (likedSongs.includes(title)) {
+    likedSongs = likedSongs.filter(s => s !== title);
+    btn.classList.remove("liked");
+  } else {
+    likedSongs.push(title);
+    btn.classList.add("liked");
+  }
+  localStorage.setItem("likes", JSON.stringify(likedSongs));
+}
+
+function searchSongs() {
+  const value = document.getElementById("search").value.toLowerCase();
+  const filtered = songs.filter(s => s.title.toLowerCase().includes(value));
+  displaySongs(filtered);
+}
+
+displaySongs(songs);
+</script>
 
 </body>
 </html>
