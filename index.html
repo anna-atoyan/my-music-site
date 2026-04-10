@@ -14,7 +14,29 @@ body {
 
 header {
   padding: 20px;
-  background: linear-gradient(90deg, #8B0000, #0033A0, #FF8C00);
+  background: #222;
+}
+
+/* KEEP YOUR ORIGINAL DESIGN STYLE */
+.song {
+  margin: 20px;
+  padding: 15px;
+  background: #1e1e1e;
+  border-radius: 10px;
+}
+
+button {
+  padding: 8px 15px;
+  border: none;
+  background: #ff4d6d;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+button:hover {
+  background: #ff1e4d;
 }
 
 input, select {
@@ -25,29 +47,7 @@ input, select {
 }
 
 .section {
-  margin: 30px;
-}
-
-.song {
-  margin: 10px;
-  padding: 10px;
-  background: #1e1e1e;
-  border-radius: 10px;
-  display: inline-block;
-  width: 200px;
-}
-
-button {
-  padding: 5px 10px;
-  border: none;
-  background: #ff4d6d;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #ff1e4d;
+  margin-top: 30px;
 }
 
 .liked {
@@ -61,13 +61,13 @@ button:hover {
 
 <header>
   <h1>🎵 My Music Site</h1>
-  <p>Browse by music type 🇦🇲</p>
+  <p>Simple music collection</p>
 </header>
 
 <input type="text" id="search" placeholder="Search songs..." onkeyup="filterSongs()">
 
 <select id="categoryFilter" onchange="filterSongs()">
-  <option value="all">All Types</option>
+  <option value="all">All Genres</option>
 </select>
 
 <div id="content"></div>
@@ -77,13 +77,9 @@ const songs = [
   { title: "Pop Song", file: "song1.mp3", category: "pop" },
   { title: "Jazz Song", file: "song2.mp3", category: "jazz" },
   { title: "Armenian Duduk", file: "song3.mp3", category: "armenian" },
-
   { title: "Rock Anthem", file: "song4.mp3", category: "rock" },
   { title: "Rap Beat", file: "song5.mp3", category: "rap" },
-  { title: "Electronic Wave", file: "song6.mp3", category: "electronic" },
-  { title: "Classical Piano", file: "song7.mp3", category: "classical" },
-  { title: "Folk Melody", file: "song8.mp3", category: "folk" },
-  { title: "Lo-fi Chill", file: "song9.mp3", category: "lofi" }
+  { title: "Electronic Wave", file: "song6.mp3", category: "electronic" }
 ];
 
 let likedSongs = JSON.parse(localStorage.getItem("likes")) || [];
@@ -95,7 +91,7 @@ function populateGenres() {
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
-    option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    option.textContent = cat;
     select.appendChild(option);
   });
 }
@@ -119,7 +115,7 @@ function renderSongs(filteredSongs) {
 
         section.innerHTML += `
           <div class="song">
-            <h4>${song.title}</h4>
+            <h3>${song.title}</h3>
             <audio controls src="${song.file}"></audio><br>
             <button class="${liked}" onclick="toggleLike('${song.title}', this)">❤️</button>
           </div>
@@ -160,6 +156,7 @@ function toggleLike(title, btn) {
 
 function fixAudio() {
   const audios = document.querySelectorAll("audio");
+
   audios.forEach(audio => {
     audio.addEventListener("play", () => {
       audios.forEach(a => {
