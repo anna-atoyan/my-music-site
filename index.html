@@ -1,152 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Armenian Music Hub</title>
+  <meta charset="UTF-8">
+  <title>My Music Site</title>
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #2b0000, #000);
-  color: white;
-}
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: white;
+      text-align: center;
+    }
 
-/* HEADER */
-header {
-  background: #8B0000;
-  padding: 15px;
-  text-align: center;
-  font-size: 24px;
-}
+    header {
+      padding: 20px;
+      background: linear-gradient(90deg, #8B0000, #0033A0, #FF8C00);
+    }
 
-/* SEARCH */
-#search {
-  width: 90%;
-  padding: 10px;
-  margin: 15px;
-  border-radius: 8px;
-  border: none;
-}
+    .song {
+      margin: 20px;
+      padding: 15px;
+      background: #1e1e1e;
+      border-radius: 10px;
+      display: inline-block;
+      width: 250px;
+    }
 
-/* GRID */
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+    button {
+      padding: 8px 15px;
+      border: none;
+      background: #ff4d6d;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 5px;
+    }
 
-.song {
-  background: #1a1a1a;
-  margin: 10px;
-  padding: 15px;
-  border-radius: 12px;
-  width: 200px;
-  text-align: center;
-}
+    button:hover {
+      background: #ff1e4d;
+    }
 
-.song img {
-  width: 100%;
-  border-radius: 10px;
-}
+    input {
+      padding: 10px;
+      width: 60%;
+      margin: 20px;
+      border-radius: 5px;
+      border: none;
+    }
 
-/* PLAYER BAR */
-.player {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #111;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* BUTTONS */
-button {
-  background: #d32f2f;
-  border: none;
-  padding: 8px 12px;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #ff5252;
-}
-
-.liked {
-  color: gold;
-}
-</style>
+    .liked {
+      background: gold !important;
+      color: black;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>🇦🇲 Armenian Music Hub</header>
+<header>
+  <h1>🎵 My Music Site</h1>
+  <p>Enjoy Armenian vibes 🇦🇲</p>
+</header>
 
-<center>
-<input type="text" id="search" placeholder="Search music..." onkeyup="searchSongs()">
-</center>
+<input type="text" id="search" placeholder="Search songs..." onkeyup="searchSongs()">
 
-<div class="container" id="songs"></div>
-
-<div class="player">
-  <div id="nowPlaying">No song playing</div>
-  <audio id="audio" controls></audio>
-</div>
+<div id="songs"></div>
 
 <script>
 const songs = [
-  {
-    title: "Armenian Vibes",
-    file: "song1.mp3",
-    cover: "https://via.placeholder.com/200"
-  },
-  {
-    title: "Yerevan Nights",
-    file: "song2.mp3",
-    cover: "https://via.placeholder.com/200"
-  },
-  {
-    title: "Duduk Soul",
-    file: "song3.mp3",
-    cover: "https://via.placeholder.com/200"
-  }
+  { title: "Song 1", file: "song1.mp3" },
+  { title: "Song 2", file: "song2.mp3" },
+  { title: "Song 3", file: "song3.mp3" }
 ];
 
 let likedSongs = JSON.parse(localStorage.getItem("likes")) || [];
 
-const container = document.getElementById("songs");
-const audio = document.getElementById("audio");
-const nowPlaying = document.getElementById("nowPlaying");
-
 function displaySongs(list) {
+  const container = document.getElementById("songs");
   container.innerHTML = "";
-  list.forEach((song, index) => {
+
+  list.forEach(song => {
     const liked = likedSongs.includes(song.title) ? "liked" : "";
 
     container.innerHTML += `
       <div class="song">
-        <img src="${song.cover}">
         <h3>${song.title}</h3>
-        <button onclick="play(${index})">▶ Play</button>
-        <button class="${liked}" onclick="like('${song.title}', this)">❤️</button>
+        <audio controls src="${song.file}"></audio><br>
+        <button onclick="toggleLike('${song.title}', this)" class="${liked}">❤️</button>
       </div>
     `;
   });
+
+  fixAudio();
 }
 
-function play(i) {
-  audio.src = songs[i].file;
-  audio.play();
-  nowPlaying.innerText = "Now Playing: " + songs[i].title;
+function fixAudio() {
+  const audios = document.querySelectorAll("audio");
+  audios.forEach(audio => {
+    audio.addEventListener("play", () => {
+      audios.forEach(a => {
+        if (a !== audio) {
+          a.pause();
+          a.currentTime = 0;
+        }
+      });
+    });
+  });
 }
 
-function like(title, btn) {
+function toggleLike(title, btn) {
   if (likedSongs.includes(title)) {
-    likedSongs = likedSongs.filter(s => s !== title);
+    likedSongs = likedSongs.filter(t => t !== title);
     btn.classList.remove("liked");
   } else {
     likedSongs.push(title);
