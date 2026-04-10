@@ -1,97 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Music Site</title>
+<meta charset="UTF-8">
+<title>My Music Site</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #111;
-      color: white;
-      text-align: center;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #111;
+  color: white;
+  text-align: center;
+}
 
-    header {
-      padding: 20px;
-      background: linear-gradient(90deg, #8B0000, #0033A0, #FF8C00);
-    }
+header {
+  padding: 20px;
+  background: linear-gradient(90deg, #8B0000, #0033A0, #FF8C00);
+}
 
-    .song {
-      margin: 20px;
-      padding: 15px;
-      background: #1e1e1e;
-      border-radius: 10px;
-      display: inline-block;
-      width: 250px;
-    }
+input, select {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+}
 
-    button {
-      padding: 8px 15px;
-      border: none;
-      background: #ff4d6d;
-      color: white;
-      cursor: pointer;
-      border-radius: 5px;
-      margin: 5px;
-    }
+.section {
+  margin: 30px;
+}
 
-    button:hover {
-      background: #ff1e4d;
-    }
+.song {
+  margin: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  border-radius: 10px;
+  display: inline-block;
+  width: 200px;
+}
 
-    input {
-      padding: 10px;
-      width: 60%;
-      margin: 20px;
-      border-radius: 5px;
-      border: none;
-    }
+button {
+  padding: 5px 10px;
+  border: none;
+  background: #ff4d6d;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-    .liked {
-      background: gold !important;
-      color: black;
-    }
-  </style>
+button:hover {
+  background: #ff1e4d;
+}
+
+.liked {
+  background: gold;
+  color: black;
+}
+</style>
 </head>
 
 <body>
 
 <header>
   <h1>🎵 My Music Site</h1>
-  <p>Enjoy Armenian vibes 🇦🇲</p>
+  <p>Browse by music type 🇦🇲</p>
 </header>
 
-<input type="text" id="search" placeholder="Search songs..." onkeyup="searchSongs()">
+<input type="text" id="search" placeholder="Search songs..." onkeyup="filterSongs()">
 
-<div id="songs"></div>
+<select id="categoryFilter" onchange="filterSongs()">
+  <option value="all">All Types</option>
+</select>
+
+<div id="content"></div>
 
 <script>
 const songs = [
-  { title: "Song 1", file: "song1.mp3" },
-  { title: "Song 2", file: "song2.mp3" },
-  { title: "Song 3", file: "song3.mp3" }
+  { title: "Pop Song", file: "song1.mp3", category: "pop" },
+  { title: "Jazz Song", file: "song2.mp3", category: "jazz" },
+  { title: "Armenian Duduk", file: "song3.mp3", category: "armenian" },
+
+  { title: "Rock Anthem", file: "song4.mp3", category: "rock" },
+  { title: "Rap Beat", file: "song5.mp3", category: "rap" },
+  { title: "Electronic Wave", file: "song6.mp3", category: "electronic" },
+  { title: "Classical Piano", file: "song7.mp3", category: "classical" },
+  { title: "Folk Melody", file: "song8.mp3", category: "folk" },
+  { title: "Lo-fi Chill", file: "song9.mp3", category: "lofi" }
 ];
 
 let likedSongs = JSON.parse(localStorage.getItem("likes")) || [];
 
-function displaySongs(list) {
-  const container = document.getElementById("songs");
-  container.innerHTML = "";
+function populateGenres() {
+  const select = document.getElementById("categoryFilter");
+  const categories = [...new Set(songs.map(s => s.category))];
 
-  list.forEach(song => {
-    const liked = likedSongs.includes(song.title) ? "liked" : "";
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    select.appendChild(option);
+  });
+}
 
-    container.innerHTML += `
-      <div class="song">
-        <h3>${song.title}</h3>
-        <audio controls src="${song.file}"></audio><br>
-        <button onclick="toggleLike('${song.title}', this)" class="${liked}">❤️</button>
-      </div>
-    `;
+function renderSongs(filteredSongs) {
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+
+  const categories = [...new Set(filteredSongs.map(s => s.category))];
+
+  categories.forEach(cat => {
+    const section = document.createElement("div");
+    section.className = "section";
+
+    section.innerHTML = `<h2>${cat.toUpperCase()}</h2>`;
+
+    filteredSongs
+      .filter(song => song.category === cat)
+      .forEach(song => {
+        const liked = likedSongs.includes(song.title) ? "liked" : "";
+
+        section.innerHTML += `
+          <div class="song">
+            <h4>${song.title}</h4>
+            <audio controls src="${song.file}"></audio><br>
+            <button class="${liked}" onclick="toggleLike('${song.title}', this)">❤️</button>
+          </div>
+        `;
+      });
+
+    content.appendChild(section);
   });
 
   fixAudio();
+}
+
+function filterSongs() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
+
+  let filtered = songs.filter(song =>
+    song.title.toLowerCase().includes(search)
+  );
+
+  if (category !== "all") {
+    filtered = filtered.filter(song => song.category === category);
+  }
+
+  renderSongs(filtered);
+}
+
+function toggleLike(title, btn) {
+  if (likedSongs.includes(title)) {
+    likedSongs = likedSongs.filter(t => t !== title);
+    btn.classList.remove("liked");
+  } else {
+    likedSongs.push(title);
+    btn.classList.add("liked");
+  }
+  localStorage.setItem("likes", JSON.stringify(likedSongs));
 }
 
 function fixAudio() {
@@ -108,24 +172,8 @@ function fixAudio() {
   });
 }
 
-function toggleLike(title, btn) {
-  if (likedSongs.includes(title)) {
-    likedSongs = likedSongs.filter(t => t !== title);
-    btn.classList.remove("liked");
-  } else {
-    likedSongs.push(title);
-    btn.classList.add("liked");
-  }
-  localStorage.setItem("likes", JSON.stringify(likedSongs));
-}
-
-function searchSongs() {
-  const value = document.getElementById("search").value.toLowerCase();
-  const filtered = songs.filter(s => s.title.toLowerCase().includes(value));
-  displaySongs(filtered);
-}
-
-displaySongs(songs);
+populateGenres();
+renderSongs(songs);
 </script>
 
 </body>
